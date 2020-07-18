@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MeetingRoom.CommandHandler.Commands.MeetingRoom
+namespace MeetingRoom.CommandHandler.Commands.Room
 {
-    public class AddMeetingRoomResponse
+    public class AddRoomResponse
     {
         public Guid Id { get; set; }
     }

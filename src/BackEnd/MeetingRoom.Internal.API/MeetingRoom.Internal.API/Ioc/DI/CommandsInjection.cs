@@ -1,10 +1,6 @@
 ﻿using MediatR;
-using MeetingRoom.CommandHandler.Commands.MeetingRoom;
+using MeetingRoom.CommandHandler.Commands.Room;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MeetingRoom.Internal.API.Ioc.DI
 {
@@ -12,7 +8,7 @@ namespace MeetingRoom.Internal.API.Ioc.DI
     {
         public static void Inject(IServiceCollection services)
         {
-            services.AddScoped<IRequestHandler<AddMeetingRoomCommand, AddMeetingRoomResponse>, MeetingRoomCommandHandler>();
+            services.AddScoped<IRequestHandler<AddRoomCommand, AddRoomResponse>, RoomCommandHandler>();
         }
     }
 }
