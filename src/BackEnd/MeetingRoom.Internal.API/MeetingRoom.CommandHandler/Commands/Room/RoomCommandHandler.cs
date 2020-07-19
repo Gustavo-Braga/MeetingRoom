@@ -21,9 +21,19 @@ namespace MeetingRoom.CommandHandler.Commands.Room
 
         public async Task<AddRoomResponse> Handle(AddRoomCommand request, CancellationToken cancellationToken)
         {
-            var teste_mapper = _mapper.Map<Domain.Models.Room>(request);
-            var a = await _roomService.AddRoom(teste_mapper);
-            return new AddRoomResponse { Id = new Guid()};
+            try
+            {
+                var room = _mapper.Map<Domain.Models.Room>(request);
+                var response = await _roomService.AddRoomAsync(room);
+                return new AddRoomResponse { Id = response };
+            }
+            catch (Exception ex)
+            {
+                var a = ex;
+                //notification
+                throw;
+            }
+
         }
     }
 }

@@ -17,16 +17,17 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<object> AddAsync(T entity)
+        public async Task<T> AddAsync(T entity)
         {
-            return await _unitOfWork.Context.Set<T>().AddAsync(entity);
+            var entityEntry = await _unitOfWork.Context.Set<T>().AddAsync(entity);
+            return entityEntry.Entity;
         }
 
         public async Task DeleteAsync(T entity)
         {
-            await Task.Run(async () =>
+            await Task.Run(() =>
              {
-                 _unitOfWork.Context.Set<T>().Remove(await _unitOfWork.Context.Set<T>().FindAsync(entity));
+                 _unitOfWork.Context.Set<T>().Remove(entity);
              });
         }
 
@@ -47,13 +48,24 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
             });
         }
 
-        public async Task UpdateAsync(T entity)
+        public async Task<T> UpdateAsync(T entity)
         {
-            await Task.Run(() =>
+            return await Task.Run(() =>
             {
                 _unitOfWork.Context.Entry(entity).State = EntityState.Modified;
-                _unitOfWork.Context.Set<T>().Attach(entity);
+                var entityEntry = _unitOfWork.Context.Set<T>().Attach(entity);
+                return entityEntry.Entity;
             });
+        }
+
+        public async Task<T> SingleOrDefault(Expression<Func<T, bool>> expression)
+        {
+            return await Task.Run(() =>
+            {
+                var entityEntry = _unitOfWork.Context.Set<T>().SingleOrDefault(expression);
+                return entityEntry;
+            });
+
         }
     }
 }
