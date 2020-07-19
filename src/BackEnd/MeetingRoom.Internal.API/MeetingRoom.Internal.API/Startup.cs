@@ -1,5 +1,5 @@
-﻿using MeetingRoom.Infra.Data.Command.Context;
-using MeetingRoom.Internal.API.Core;
+﻿using MeetingRoom.CrossCutting.Notification;
+using MeetingRoom.Infra.Data.Command.Context;
 using MeetingRoom.Internal.API.Ioc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MeetingRoom.Internal.API
 {
@@ -23,11 +26,28 @@ namespace MeetingRoom.Internal.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                 {
+                     options.InvalidModelStateResponseFactory = context =>
+                     {
+                         if (!context.ModelState.IsValid)
+                         {
+                             if (context.ModelState.Values.Any())
+                             {
+                                 var notifications = new List<Notification>();
+                                 foreach (var item in context.ModelState)
+                                     if (item.Value.Errors.Any(x => !string.IsNullOrEmpty(x.ErrorMessage)))
+                                         notifications.Add(new Notification(item.Key, string.Join(", ", item.Value.Errors.Select(x => x.ErrorMessage))));
+
+                                 return new BadRequestObjectResult(new { data = default(Nullable), success = false, notifications });
+                             }
+                         }
+                         return new BadRequestObjectResult(context.ModelState);
+                     };
+                 });
+
             services.AddControllers();
-            //services.AddControllers(options =>
-            //{
-            //    options.Filters.Add(typeof(NotificationFilter));
-            //});
 
             services.AddSwaggerGen(c =>
             {
@@ -60,12 +80,17 @@ namespace MeetingRoom.Internal.API
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            try
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<MeetingRoomDBContext>();
-                context.Database.EnsureCreated();
+                using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+                {
+                    var context = serviceScope.ServiceProvider.GetRequiredService<MeetingRoomDBContext>();
+                    context.Database.EnsureCreated();
+                }
+            }
+            catch (System.Exception)
+            {
+                //log
             }
 
             if (env.IsDevelopment())

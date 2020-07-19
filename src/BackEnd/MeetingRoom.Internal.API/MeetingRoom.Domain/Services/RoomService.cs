@@ -24,7 +24,6 @@ namespace MeetingRoom.Domain.Services
         {
             try
             {
-                throw new Exception("Erro personalusado");
                 if (!await IsDuplicated(request.Name))
                 {
                     var entity = await _roomRepository.AddAsync(request);
@@ -33,56 +32,39 @@ namespace MeetingRoom.Domain.Services
                     return entity.Id;
                 }
                 else
-                {
-                    await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}"));
-                }
-
-                return new Guid();
-
+                    await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}."));
             }
             catch (Exception ex)
             {
-                await _mediator.Publish(new Notification("AddRoomAsync", $"Ocorreu um erro ao tentar adicionar a sala {request.Name}. Erro: \"{ex.Message}\""));
-                return new Guid();
+                await _mediator.Publish(new Notification("AddRoomAsync_Exception", $"Ocorreu um erro ao tentar adicionar a sala {request.Name}. Erro: {ex.Message}"));
             }
+
+            return new Guid();
 
         }
 
-        public async Task<Room> UpdateRoomAsync(Room request)
+        public async Task UpdateRoomAsync(Room request)
         {
             try
             {
                 var room = await _roomRepository.SingleOrDefault(x => x.Id == request.Id);
                 if (room != null)
                 {
-                    if (await IsDuplicated(room.Name))
-                    {
-                        // notification
-                    }
+                    if (await IsDuplicated(request.Name))
+                        await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}."));
                     else
                     {
-                        var entity = await _roomRepository.UpdateAsync(room);
+                        await _roomRepository.UpdateAsync(room, request);
                         await _unitOfWork.CommitAsync();
-
-                        return entity;
                     }
-
                 }
                 else
-                {
-                    //notification
-                }
-
-                return new Room();
-
+                    await _mediator.Publish(new Notification("RoomNotFoun", $"Não foi possível localizar a sala solicitada."));
             }
             catch (Exception ex)
             {
-                var testeEX = ex;
-                //notification
-                throw;
+                await _mediator.Publish(new Notification("UpdateRoomAsync_Exception", $"Ocorreu um erro ao tentar alterar a sala solicitada. Erro: {ex.Message}"));
             }
-
         }
 
         public async Task<bool> DeleteRoomAsync(Guid id)
@@ -98,17 +80,14 @@ namespace MeetingRoom.Domain.Services
                     return response > 0;
                 }
                 else
-                {
-                    //notification nao localizado
-                    return false;
-                }
+                    await _mediator.Publish(new Notification("RoomNotFoun", $"Não foi possível localizar a sala solicitada."));
             }
             catch (Exception ex)
             {
-                var testeEX = ex;
-                //notification
-                throw;
+                await _mediator.Publish(new Notification("DeleteRoomAsync_Exception", $"Ocorreu um erro ao tentar excluir a sala solicitada. Erro: {ex.Message}"));
             }
+
+            return false;
         }
 
         private async Task<bool> IsDuplicated(string name)

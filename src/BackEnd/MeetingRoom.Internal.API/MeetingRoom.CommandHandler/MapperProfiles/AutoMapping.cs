@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MeetingRoom.CommandHandler.Commands.Room.Add;
+using MeetingRoom.CommandHandler.Commands.Room.Update;
 using MeetingRoom.Domain.Models;
 
 namespace MeetingRoom.CommandHandler.MapperProfiles
@@ -9,6 +10,7 @@ namespace MeetingRoom.CommandHandler.MapperProfiles
         public AutoMapping()
         {
             CreateMap<AddRoomCommand, Room>().ReverseMap();
+            CreateMap<UpdateRoomCommand, Room>().ReverseMap();
         }
     }
 }

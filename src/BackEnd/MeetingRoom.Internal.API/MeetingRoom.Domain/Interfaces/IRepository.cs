@@ -11,7 +11,7 @@ namespace MeetingRoom.Domain.Interfaces
         Task DeleteAsync(T entity);
         Task<IEnumerable<T>> GetAsync();
         Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
-        Task<T> UpdateAsync(T entity);
+        Task<T> UpdateAsync(T exists, T currentValue);
         Task<T> SingleOrDefault(Expression<Func<T, bool>> expression);
     }
 }

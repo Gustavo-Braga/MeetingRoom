@@ -48,12 +48,13 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
             });
         }
 
-        public async Task<T> UpdateAsync(T entity)
+        public async Task<T> UpdateAsync(T exists, T currentValues)
         {
             return await Task.Run(() =>
             {
-                _unitOfWork.Context.Entry(entity).State = EntityState.Modified;
-                var entityEntry = _unitOfWork.Context.Set<T>().Attach(entity);
+                _unitOfWork.Context.Entry(exists).State = EntityState.Modified;
+                _unitOfWork.Context.Entry(exists).CurrentValues.SetValues(currentValues);
+                var entityEntry = _unitOfWork.Context.Set<T>().Update(exists);
                 return entityEntry.Entity;
             });
         }
