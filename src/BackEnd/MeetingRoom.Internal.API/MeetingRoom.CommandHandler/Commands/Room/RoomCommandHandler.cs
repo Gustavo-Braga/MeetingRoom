@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using MeetingRoom.CommandHandler.Commands.Base;
+using MeetingRoom.CommandHandler.Commands.Room.Add;
 using MeetingRoom.Domain.Interfaces;
 using System;
 using System.Threading;

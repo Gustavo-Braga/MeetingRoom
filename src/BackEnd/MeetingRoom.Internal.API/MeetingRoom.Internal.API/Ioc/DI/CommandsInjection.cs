@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MeetingRoom.CommandHandler.Commands.Room;
+using MeetingRoom.CommandHandler.Commands.Room.Add;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MeetingRoom.Internal.API.Ioc.DI

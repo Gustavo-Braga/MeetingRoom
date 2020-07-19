@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MeetingRoom.CommandHandler.Commands.Room
+namespace MeetingRoom.CommandHandler.Commands.Room.Add
 {
     public class AddRoomCommand : IRequest<AddRoomResponse>
     {

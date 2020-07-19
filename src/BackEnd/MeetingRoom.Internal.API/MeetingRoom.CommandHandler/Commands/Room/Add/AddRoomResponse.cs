@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace MeetingRoom.CommandHandler.Commands.Room
+namespace MeetingRoom.CommandHandler.Commands.Room.Add
 {
     public class AddRoomResponse
     {

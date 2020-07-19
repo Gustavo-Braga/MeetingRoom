@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MeetingRoom.CommandHandler.Commands.Room;
+using MeetingRoom.CommandHandler.Commands.Room.Add;
 using MeetingRoom.Domain.Models;
 
 namespace MeetingRoom.CommandHandler.MapperProfiles

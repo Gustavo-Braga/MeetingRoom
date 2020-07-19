@@ -1,4 +1,5 @@
 ﻿using MeetingRoom.Infra.Data.Command.Context;
+using MeetingRoom.Internal.API.Core;
 using MeetingRoom.Internal.API.Ioc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +24,10 @@ namespace MeetingRoom.Internal.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            //services.AddControllers(options =>
+            //{
+            //    options.Filters.Add(typeof(NotificationFilter));
+            //});
 
             services.AddSwaggerGen(c =>
             {

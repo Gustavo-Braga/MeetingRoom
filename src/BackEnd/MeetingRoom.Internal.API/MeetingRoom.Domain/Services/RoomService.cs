@@ -1,4 +1,6 @@
-﻿using MeetingRoom.Domain.Interfaces;
+﻿using MediatR;
+using MeetingRoom.CrossCutting.Notification;
+using MeetingRoom.Domain.Interfaces;
 using MeetingRoom.Domain.Models;
 using System;
 using System.Threading.Tasks;
@@ -9,17 +11,20 @@ namespace MeetingRoom.Domain.Services
     {
         public readonly IRepository<Room> _roomRepository;
         public readonly IUnitOfWork _unitOfWork;
+        public readonly IMediator _mediator;
 
-        public RoomService(IRepository<Room> roomRepository, IUnitOfWork unitOfWork)
+        public RoomService(IRepository<Room> roomRepository, IUnitOfWork unitOfWork, IMediator mediator)
         {
             _roomRepository = roomRepository;
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         public async Task<Guid> AddRoomAsync(Room request)
         {
             try
             {
+                throw new Exception("Erro personalusado");
                 if (!await IsDuplicated(request.Name))
                 {
                     var entity = await _roomRepository.AddAsync(request);
@@ -29,7 +34,7 @@ namespace MeetingRoom.Domain.Services
                 }
                 else
                 {
-                    //notification
+                    await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}"));
                 }
 
                 return new Guid();
@@ -37,9 +42,8 @@ namespace MeetingRoom.Domain.Services
             }
             catch (Exception ex)
             {
-                var testeEX = ex;
-                //notification
-                throw;
+                await _mediator.Publish(new Notification("AddRoomAsync", $"Ocorreu um erro ao tentar adicionar a sala {request.Name}. Erro: \"{ex.Message}\""));
+                return new Guid();
             }
 
         }
