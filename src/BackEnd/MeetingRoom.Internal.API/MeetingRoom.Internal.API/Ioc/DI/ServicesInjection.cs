@@ -9,6 +9,7 @@ namespace MeetingRoom.Internal.API.Ioc.DI
         public static void Inject(IServiceCollection services)
         {
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<ISchedulerService, SchedulerService>();
         }
     }
 }

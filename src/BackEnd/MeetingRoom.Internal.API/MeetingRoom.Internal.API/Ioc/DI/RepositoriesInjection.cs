@@ -12,6 +12,8 @@ namespace MeetingRoom.Internal.API.Ioc.DI
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRepository<Room>, Repository<Room>>();
+            services.AddScoped<IRepository<Scheduler>, Repository<Scheduler>>();
+            
         }
     }
 }
