@@ -19,11 +19,7 @@ namespace MeetingRoom.CommandHandler.MapperProfiles
                  .ForMember(src => src.RoomSchedulers, map => map.MapFrom(src => src.Rooms.Select(room => new RoomScheduler { IdRoom = room })));
 
             CreateMap<UpdateSchedulerCommand, Scheduler>()
-                .ForMember(src => src.RoomSchedulers, map => map.MapFrom(src => src.Rooms.Select(room => new RoomScheduler { IdRoom = room})));
-
-
-
-
+                .ForMember(src => src.RoomSchedulers, map => map.MapFrom(src => src.Rooms.Select(room => new RoomScheduler { IdRoom = room, IdScheduler = src.Id})));
         }
     }
 }

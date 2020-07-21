@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Add;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Delete;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Update;
 using MeetingRoom.CrossCutting.Notification.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace MeetingRoom.Internal.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/schedulers")]
     [ApiController]
     public class SchedulerController : ApiBaseController
     {

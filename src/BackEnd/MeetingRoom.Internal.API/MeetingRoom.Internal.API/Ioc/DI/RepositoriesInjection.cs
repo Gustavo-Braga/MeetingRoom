@@ -10,6 +10,7 @@ namespace MeetingRoom.Internal.API.Ioc.DI
         {
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<ISchedulerRepository, SchedulerRepository>();
+            services.AddScoped<IRoomSchedulerRepository, RoomSchedulerRepository>();
 
         }
     }

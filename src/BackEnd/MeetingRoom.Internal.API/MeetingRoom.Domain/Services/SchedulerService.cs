@@ -15,28 +15,27 @@ namespace MeetingRoom.Domain.Services
         public readonly ISchedulerRepository _schedulerRepository;
         public readonly IRoomRepository _roomRepository;
         public readonly IMediator _mediator;
+        public readonly IRoomSchedulerRepository _roomSchedulerRepository;
 
-        public SchedulerService(ISchedulerRepository schedulerRepository, IRoomRepository roomRepository, IMediator mediator)
+        public SchedulerService(ISchedulerRepository schedulerRepository, IRoomRepository roomRepository, IMediator mediator, IRoomSchedulerRepository roomSchedulerRepository)
         {
             _schedulerRepository = schedulerRepository;
             _roomRepository = roomRepository;
             _mediator = mediator;
+            _roomSchedulerRepository = roomSchedulerRepository;
         }
 
         public async Task<Guid> AddSchedulerAsync(Scheduler request)
         {
             try
             {
-                if (await AllowedScheduler(request))
-                {
-                    var entity = await _schedulerRepository.AddAsync(request);
-                    await _schedulerRepository.CommitAsync();
-                    return entity.Id;
-                }
+                var entity = await _schedulerRepository.AddAsync(request);
+                await _schedulerRepository.CommitAsync();
+                return entity.Id;
             }
             catch (Exception ex)
             {
-                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao tentar criar o agendamento. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao tentar criar o agendamento."));
             }
             return new Guid();
         }
@@ -45,21 +44,27 @@ namespace MeetingRoom.Domain.Services
         {
             try
             {
-                if (await AllowedScheduler(request))
+                var schedulerResponse = await _schedulerRepository.SingleOrDefault(x => x.Id == request.Id);
+                if (schedulerResponse != null)
                 {
-                    var exists = await _schedulerRepository.SingleOrDefault(x => x.Id == request.Id);
-                    if (exists != null)
-                    {
-                        await _schedulerRepository.UpdateAsync(exists);
-                        return await _schedulerRepository.CommitAsync();
-                    }
-                    else
-                        await _mediator.Publish(new Notification("SchedulerNotFoun", $"Não foi possível localizar o agendamento solicitado."));
+                    var toInsert = request.RoomSchedulers.Where(x => !schedulerResponse.RoomSchedulers.Any(y => y.IdRoom == x.IdRoom));
+                    var toRemove = schedulerResponse.RoomSchedulers.Where(x => !request.RoomSchedulers.Any(y => y.IdRoom == x.IdRoom))
+                        .Select(x => new RoomScheduler { IdRoom = x.IdRoom, IdScheduler = x.IdScheduler });
+
+                    await _schedulerRepository.DetachLocal(x => x.Id == request.Id);
+                    await _schedulerRepository.UpdateAsync(request);
+
+                    await _roomSchedulerRepository.AddRangeAsync(toInsert);
+                    await _roomSchedulerRepository.RemoveRange(toRemove);
+
+                    return await _schedulerRepository.CommitAsync();
                 }
+                else
+                    await _mediator.Publish(new Notification("SchedulerService", $"Não foi possível localizar a agenda informada."));
             }
             catch (Exception ex)
             {
-                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao tentar alterar o agendamento. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao tentar alterar o agendamento."));
             }
             return false;
         }
@@ -68,94 +73,55 @@ namespace MeetingRoom.Domain.Services
         {
             try
             {
+                var scheduler = await _schedulerRepository.SingleOrDefault(x => x.Id == id);
+                if (scheduler != null && scheduler.RoomSchedulers.Any())
+                {
+                    await _mediator.Publish(new Notification("DeleteSchedulerAsync", $"Antes de remover esta agenda, é necessário remover todas as salas"));
+                    return false;
+                }
                 await _schedulerRepository.DeleteAsync(id);
                 return await _schedulerRepository.CommitAsync();
             }
             catch (Exception ex)
             {
-                await _mediator.Publish(new Notification("DeleteRoomAsync_Exception", $"Ocorreu um erro ao tentar excluir a sala solicitada. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("DeleteSchedulerAsync_Exception", $"Ocorreu um erro ao tentar excluir a sala solicitada."));
             }
             return false;
         }
 
-        private async Task<Room> GetRoom(Guid id)
+        public async Task<List<ConflictsRoom>> GetConflictsRoom(Scheduler request)
         {
-            var room = await _roomRepository.SingleOrDefault(x => x.Id == id);
-            return room;
-        }
-
-        private async Task<bool> AllowedScheduler(Scheduler request)
-        {
+            var response = new List<ConflictsRoom>();
             try
             {
-                var room = await _roomRepository.GetAsync();
-
-
-
-                    if (request.DateIsValid)
-                        return true;
-                    else
-                        await _mediator.Publish(new Notification("InvalidDate", "Data de inicio da reunião deve ser maior que a data de termino."));
-            }
-            catch (Exception ex)
-            {
-                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao consultar informações para o agendamento. Erro: {ex.Message}"));
-            }
-            return false;
-        }
-
-
-        private async Task<bool> GetConflictsRoom(Scheduler request)
-        {
-            try
-            {
-                var response = new List<ConflictsRoom>();
-                DateTime startConflict;
-                DateTime endConflict;
-                foreach (var roomScheduler in request.RoomSchedulers)
+                var rooms = await _roomRepository.GetAsync(x => request.RoomSchedulers.Any(y => y.IdRoom == x.Id));
+                foreach (var room in rooms)
                 {
-                    var room = await _roomRepository.GetAsync(x=> x.Id == roomScheduler.IdRoom);
-
-                    var teste = room.First();
                     var schedulerConflicts = new List<SchedulerConflict>();
-                    foreach (var scheduler in teste.RoomSchedulers.Select(x=> x.Scheduler))
+                    foreach (var scheduler in room.RoomSchedulers.Where(x => x.IdScheduler != request.Id).Select(x => x.Scheduler))
                     {
-                        //if (!(request.StartDate > scheduler.StartDate && request.StartDate > scheduler.EndDate))
-                        //{
-                        //    response.Add()
-                        //    startConflict = request.StartDate > scheduler.StartDate ? request.StartDate : scheduler.StartDate;
-                        //    endConflict
-                        //}
-                        
-    
-
-
+                        if (!(request.StartDate > scheduler.StartDate && request.StartDate > scheduler.EndDate)
+                            || request.StartDate < scheduler.StartDate && request.EndDate < scheduler.StartDate)
+                        {
+                            schedulerConflicts.Add(new SchedulerConflict(
+                                scheduler.Id,
+                                scheduler.Title,
+                                request.StartDate > scheduler.StartDate ? request.StartDate : scheduler.StartDate,
+                                request.EndDate < scheduler.EndDate ? request.EndDate : scheduler.EndDate
+                                ));
+                        }
                     }
-                    var schedulers = teste.RoomSchedulers.Where(x=> x.Scheduler.StartDate >= request.StartDate)
-
-
-
-
+                    if (schedulerConflicts.Any())
+                        response.Add(new ConflictsRoom(room.Id, room.Name, schedulerConflicts));
                 }
-                //var room = await _roomRepository.GetAsync();
-
-
-
-                if (request.DateIsValid)
-                    return true;
-                else
-                    await _mediator.Publish(new Notification("InvalidDate", "Data de inicio da reunião deve ser maior que a data de termino."));
             }
             catch (Exception ex)
             {
-                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao consultar informações para o agendamento. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("SchedulerService_Exception", $"Ocorreu um erro ao consultar informações para o agendamento."));
+                return response;
             }
-            return false;
-        }
 
-        //public async Task<Scheduler> GetSchedulerWithRooms(Guid id)
-        //{
-        //    var teste =
-        //}
+            return response;
+        }
     }
 }

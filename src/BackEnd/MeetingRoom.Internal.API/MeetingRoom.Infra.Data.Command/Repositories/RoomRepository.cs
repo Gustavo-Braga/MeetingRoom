@@ -16,13 +16,16 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
         {
         }
 
-        public override async Task<IEnumerable<Room>> GetAsync(Expression<Func<Room, bool>> expression)
-        {//async
-            var teste = _dbSet
-                .Include(room => room.RoomSchedulers)
+
+        public override async Task<IEnumerable<Room>> GetAsync(Func<Room, bool> predicate)
+        {
+            return await Task.Run(() =>
+            {
+                return _dbSet.Include(room => room.RoomSchedulers)
                 .ThenInclude(roomSchedulers => roomSchedulers.Scheduler)
-                .AsQueryable().Where(expression).AsEnumerable();
-            return teste;
+                .AsQueryable().Where(predicate).AsEnumerable();
+
+            });
         }
     }
 }

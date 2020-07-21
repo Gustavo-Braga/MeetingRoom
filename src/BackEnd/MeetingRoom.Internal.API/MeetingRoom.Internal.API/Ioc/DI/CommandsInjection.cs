@@ -20,7 +20,7 @@ namespace MeetingRoom.Internal.API.Ioc.DI
             services.AddScoped<IRequestHandler<DeleteRoomCommand, Unit>, RoomCommandHandler>();
 
             services.AddScoped<IRequestHandler<AddSchedulerCommand, AddSchedulerResponse>, SchedulerCommandHandler>();
-            services.AddScoped<IRequestHandler<UpdateSchedulerCommand, Unit>, SchedulerCommandHandler>();
+            services.AddScoped<IRequestHandler<UpdateSchedulerCommand, UpdateSchedulerResponse>, SchedulerCommandHandler>();
             services.AddScoped<IRequestHandler<DeleteSchedulerCommand, Unit>, SchedulerCommandHandler>();
         }
     }

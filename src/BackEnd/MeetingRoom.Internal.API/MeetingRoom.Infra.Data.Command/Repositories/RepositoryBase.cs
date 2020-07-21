@@ -40,11 +40,11 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
             });
         }
 
-        public virtual async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
+        public virtual async Task<IEnumerable<T>> GetAsync(Func<T, bool> predicate)
         {
             return await Task.Run(() =>
             {
-                return _dbSet.AsQueryable().Where(expression).AsEnumerable();
+                return _dbSet.AsQueryable().Where(predicate).AsEnumerable();
 
             });
         }
@@ -68,6 +68,17 @@ namespace MeetingRoom.Infra.Data.Command.Repositories
             {
                 var entityEntry = _dbSet.SingleOrDefault(expression);
                 return entityEntry;
+            });
+
+        }
+
+        public virtual async Task DetachLocal(Func<T, bool> expression)
+        {
+            await Task.Run(() =>
+            {
+                var local = _dbSet.Local.Where(expression).FirstOrDefault();
+                if (local != null)
+                    _dbContext.Entry(local).State = EntityState.Detached;
             });
 
         }

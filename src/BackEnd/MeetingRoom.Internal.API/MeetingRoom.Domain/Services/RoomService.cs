@@ -3,8 +3,6 @@ using MeetingRoom.CrossCutting.Notification;
 using MeetingRoom.Domain.Interfaces;
 using MeetingRoom.Domain.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MeetingRoom.Domain.Services
