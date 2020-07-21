@@ -3,20 +3,20 @@ using MeetingRoom.CrossCutting.Notification;
 using MeetingRoom.Domain.Interfaces;
 using MeetingRoom.Domain.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MeetingRoom.Domain.Services
 {
     public class RoomService : IRoomService
     {
-        public readonly IRepository<Room> _roomRepository;
-        public readonly IUnitOfWork _unitOfWork;
+        public readonly IRoomRepository _roomRepository;
         public readonly IMediator _mediator;
 
-        public RoomService(IRepository<Room> roomRepository, IUnitOfWork unitOfWork, IMediator mediator)
+        public RoomService(IRoomRepository roomRepository, IMediator mediator)
         {
             _roomRepository = roomRepository;
-            _unitOfWork = unitOfWork;
             _mediator = mediator;
         }
 
@@ -27,7 +27,7 @@ namespace MeetingRoom.Domain.Services
                 if (!await IsDuplicated(request.Name))
                 {
                     var entity = await _roomRepository.AddAsync(request);
-                    await _unitOfWork.CommitAsync();
+                    await _roomRepository.CommitAsync();
 
                     return entity.Id;
                 }
@@ -43,48 +43,35 @@ namespace MeetingRoom.Domain.Services
 
         }
 
-        public async Task UpdateRoomAsync(Room request)
+        public async Task<bool> UpdateRoomAsync(Room request)
         {
             try
             {
-                var room = await _roomRepository.SingleOrDefault(x => x.Id == request.Id);
-                if (room != null)
-                {
-                    if (await IsDuplicated(request.Name))
-                        await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}."));
-                    else
-                    {
-                        await _roomRepository.UpdateAsync(room, request);
-                        await _unitOfWork.CommitAsync();
-                    }
-                }
+                if (await IsDuplicated(request.Name))
+                    await _mediator.Publish(new Notification("DuplicatedRoom", $"Já existe uma sala com o nome de {request.Name}."));
                 else
-                    await _mediator.Publish(new Notification("RoomNotFoun", $"Não foi possível localizar a sala solicitada."));
+                {
+                    await _roomRepository.UpdateAsync(request);
+                    return await _roomRepository.CommitAsync();
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                await _mediator.Publish(new Notification("UpdateRoomAsync_Exception", $"Ocorreu um erro ao tentar alterar a sala solicitada. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("UpdateRoomAsync_Exception", $"Ocorreu um erro ao tentar alterar a sala solicitada."));
             }
+            return false;
         }
 
         public async Task<bool> DeleteRoomAsync(Guid id)
         {
             try
             {
-                var room = await _roomRepository.SingleOrDefault(x => x.Id == id);
-                if (room != null)
-                {
-                    await _roomRepository.DeleteAsync(room);
-                    var response = await _unitOfWork.CommitAsync();
-
-                    return response > 0;
-                }
-                else
-                    await _mediator.Publish(new Notification("RoomNotFoun", $"Não foi possível localizar a sala solicitada."));
+                await _roomRepository.DeleteAsync(id);
+                return await _roomRepository.CommitAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                await _mediator.Publish(new Notification("DeleteRoomAsync_Exception", $"Ocorreu um erro ao tentar excluir a sala solicitada. Erro: {ex.Message}"));
+                await _mediator.Publish(new Notification("DeleteRoomAsync_Exception", $"Ocorreu um erro ao tentar excluir a sala solicitada."));
             }
 
             return false;
@@ -94,7 +81,6 @@ namespace MeetingRoom.Domain.Services
         {
             var duplicated = await _roomRepository.SingleOrDefault(x => x.Name == name);
             return duplicated != null;
-
         }
     }
 }

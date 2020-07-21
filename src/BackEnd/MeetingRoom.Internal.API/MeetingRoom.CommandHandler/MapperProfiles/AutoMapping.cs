@@ -4,6 +4,7 @@ using MeetingRoom.CommandHandler.Commands.Room.Update;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Add;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Update;
 using MeetingRoom.Domain.Models;
+using System.Linq;
 
 namespace MeetingRoom.CommandHandler.MapperProfiles
 {
@@ -11,11 +12,18 @@ namespace MeetingRoom.CommandHandler.MapperProfiles
     {
         public AutoMapping()
         {
-            CreateMap<AddRoomCommand, Room>().ReverseMap();
-            CreateMap<UpdateRoomCommand, Room>().ReverseMap();
+            CreateMap<AddRoomCommand, Room>();
+            CreateMap<UpdateRoomCommand, Room>();
 
-            CreateMap<AddSchedulerCommand, Scheduler>().ReverseMap();
-            CreateMap<UpdateSchedulerCommand, Scheduler>().ReverseMap();
+            CreateMap<AddSchedulerCommand, Scheduler>()
+                 .ForMember(src => src.RoomSchedulers, map => map.MapFrom(src => src.Rooms.Select(room => new RoomScheduler { IdRoom = room })));
+
+            CreateMap<UpdateSchedulerCommand, Scheduler>()
+                .ForMember(src => src.RoomSchedulers, map => map.MapFrom(src => src.Rooms.Select(room => new RoomScheduler { IdRoom = room})));
+
+
+
+
         }
     }
 }

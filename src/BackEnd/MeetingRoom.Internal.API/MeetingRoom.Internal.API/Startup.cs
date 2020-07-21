@@ -70,8 +70,6 @@ namespace MeetingRoom.Internal.API
                 options.UseSqlServer(Configuration.GetConnectionString("MeetingRoom"));
             });
 
-
-
             services.AddScoped<MeetingRoomDBContext, MeetingRoomDBContext>();
 
             Bootstrapper.Initialize(services);

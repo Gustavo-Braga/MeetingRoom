@@ -1,7 +1,5 @@
 ﻿using MeetingRoom.Domain.Interfaces;
-using MeetingRoom.Domain.Models;
 using MeetingRoom.Infra.Data.Command.Repositories;
-using MeetingRoom.Infra.Data.Command.Uow;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MeetingRoom.Internal.API.Ioc.DI
@@ -10,10 +8,9 @@ namespace MeetingRoom.Internal.API.Ioc.DI
     {
         public static void Inject(IServiceCollection services)
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IRepository<Room>, Repository<Room>>();
-            services.AddScoped<IRepository<Scheduler>, Repository<Scheduler>>();
-            
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<ISchedulerRepository, SchedulerRepository>();
+
         }
     }
 }

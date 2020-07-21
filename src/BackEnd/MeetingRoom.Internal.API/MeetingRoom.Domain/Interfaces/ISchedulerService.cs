@@ -7,7 +7,7 @@ namespace MeetingRoom.Domain.Interfaces
     public interface ISchedulerService
     {
         Task<Guid> AddSchedulerAsync(Scheduler request);
-        Task UpdateSchedulerAsync(Scheduler request);
+        Task<bool> UpdateSchedulerAsync(Scheduler request);
         Task<bool> DeleteSchedulerAsync(Guid id);
     }
 }

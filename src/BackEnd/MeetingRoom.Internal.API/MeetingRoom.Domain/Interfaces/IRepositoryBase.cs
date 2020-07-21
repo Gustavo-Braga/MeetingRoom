@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 
 namespace MeetingRoom.Domain.Interfaces
 {
-    public interface IRepository<T>
+    public interface IRepositoryBase<T>
     {
         Task<T> AddAsync(T entity);
-        Task DeleteAsync(T entity);
+        Task DeleteAsync(object id);
         Task<IEnumerable<T>> GetAsync();
         Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
-        Task<T> UpdateAsync(T exists, T currentValue);
+        Task<T> UpdateAsync(T entity);
         Task<T> SingleOrDefault(Expression<Func<T, bool>> expression);
+        Task<bool> CommitAsync();
     }
 }

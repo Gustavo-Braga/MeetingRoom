@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MeetingRoom.Domain.Models
 {
@@ -7,6 +8,6 @@ namespace MeetingRoom.Domain.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public Scheduler Scheduler { get; set; }
+        public ICollection<RoomScheduler> RoomSchedulers { get; set; }
     }
 }

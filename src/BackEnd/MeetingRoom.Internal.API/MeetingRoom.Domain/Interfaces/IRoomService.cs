@@ -7,7 +7,7 @@ namespace MeetingRoom.Domain.Interfaces
     public interface IRoomService
     {
         Task<Guid> AddRoomAsync(Room request);
-        Task UpdateRoomAsync(Room request);
+        Task<bool> UpdateRoomAsync(Room request);
         Task<bool> DeleteRoomAsync(Guid id);
     }
 }
