@@ -26,6 +26,7 @@
     <ProjectReference Include="..\MeetingRoom.CommandHandler\MeetingRoom.CommandHandler.csproj" />
     <ProjectReference Include="..\MeetingRoom.CrossCutting.Notification\MeetingRoom.CrossCutting.Notification.csproj" />
     <ProjectReference Include="..\MeetingRoom.Infra.Data.Command\MeetingRoom.Infra.Data.Command.csproj" />
+    <ProjectReference Include="..\MeetingRoom.Infra.Data.Query\MeetingRoom.Infra.Data.Query.csproj" />
   </ItemGroup>
 
 </Project>

@@ -18,9 +18,13 @@ namespace MeetingRoom.Internal.API.Ioc
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<AddRoomCommandValidator>());
 
             CommandsInjection.Inject(services);
-            RepositoriesInjection.Inject(services);
+            RepositoriesCommandInjection.Inject(services);
             ServicesInjection.Inject(services);
             CrossCuttingInjection.Inject(services);
+
+            QueriesInjection.Inject(services);
+            RepositoriesQueryInection.Inject(services);
+            
         }
     }
 }

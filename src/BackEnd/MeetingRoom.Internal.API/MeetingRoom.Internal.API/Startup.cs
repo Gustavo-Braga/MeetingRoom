@@ -1,5 +1,6 @@
 ﻿using MeetingRoom.CrossCutting.Notification;
 using MeetingRoom.Infra.Data.Command.Context;
+using MeetingRoom.Infra.Data.Query.Context;
 using MeetingRoom.Internal.API.Ioc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -65,12 +66,20 @@ namespace MeetingRoom.Internal.API
                 c.EnableAnnotations();
             });
 
+            var connectionString = Configuration.GetConnectionString("MeetingRoom");
+
             services.AddDbContext<MeetingRoomDBContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("MeetingRoom"));
+                options.UseSqlServer(connectionString);
+            });
+
+            services.AddDbContext<MeetingRoomQueryDBContex>(options =>
+            {
+                options.UseSqlServer(connectionString);
             });
 
             services.AddScoped<MeetingRoomDBContext, MeetingRoomDBContext>();
+            services.AddScoped<MeetingRoomQueryDBContex, MeetingRoomQueryDBContex>();
 
             Bootstrapper.Initialize(services);
 

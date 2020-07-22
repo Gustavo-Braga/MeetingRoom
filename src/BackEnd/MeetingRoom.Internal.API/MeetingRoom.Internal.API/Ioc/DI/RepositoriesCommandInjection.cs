@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MeetingRoom.Internal.API.Ioc.DI
 {
-    public static class RepositoriesInjection
+    public static class RepositoriesCommandInjection
     {
         public static void Inject(IServiceCollection services)
         {

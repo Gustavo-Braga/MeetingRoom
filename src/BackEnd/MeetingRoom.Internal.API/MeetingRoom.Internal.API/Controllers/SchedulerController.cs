@@ -3,6 +3,7 @@ using MeetingRoom.CommandHandler.Commands.Scheduler.Add;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Delete;
 using MeetingRoom.CommandHandler.Commands.Scheduler.Update;
 using MeetingRoom.CrossCutting.Notification.Interfaces;
+using MeetingRoom.Infra.Data.Query.Queries.Scheduler;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -15,6 +16,13 @@ namespace MeetingRoom.Internal.API.Controllers
     {
         public SchedulerController(IMediator mediator, INotificationContext notificationContext) : base(mediator, notificationContext)
         {
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            return await CreateResponse(async () => await _mediator.Send(new GetSchedulerQuery(id)));
         }
 
         [HttpPost]
