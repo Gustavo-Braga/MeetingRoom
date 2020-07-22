@@ -1,6 +1,5 @@
 ﻿using MeetingRoom.CrossCutting.Notification;
 using MeetingRoom.Infra.Data.Command.Context;
-using MeetingRoom.Infra.Data.Query.Context;
 using MeetingRoom.Internal.API.Ioc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace MeetingRoom.Internal.API
@@ -73,14 +75,8 @@ namespace MeetingRoom.Internal.API
                 options.UseSqlServer(connectionString);
             });
 
-            services.AddDbContext<MeetingRoomQueryDBContex>(options =>
-            {
-                options.UseSqlServer(connectionString);
-            });
-
+            services.AddScoped<IDbConnection, DbConnection>(x => new SqlConnection(connectionString));
             services.AddScoped<MeetingRoomDBContext, MeetingRoomDBContext>();
-            services.AddScoped<MeetingRoomQueryDBContex, MeetingRoomQueryDBContex>();
-
             Bootstrapper.Initialize(services);
 
         }

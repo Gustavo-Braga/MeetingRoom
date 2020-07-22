@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MeetingRoom.Infra.Data.Query.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,17 +18,7 @@ namespace MeetingRoom.Infra.Data.Query.Queries.Scheduler
 
         public async Task<IEnumerable<GetSchedulerQueryResponse>> Handle(GetSchedulerQuery request, CancellationToken cancellationToken)
         {
-            //var schedulers = await _schedulerRepository.GetAsync(x => request.Id != default(Guid) ? x.Id == request.Id : true);
-
-            var response = new List<GetSchedulerQueryResponse>();
-            //foreach (var item in schedulers)
-            //{
-            //    response
-
-            //}
-
-
-            return response;
+            return await _schedulerRepository.GetAsync(request.Id != default ? request.Id : default(Guid?));
         }
     }
 }

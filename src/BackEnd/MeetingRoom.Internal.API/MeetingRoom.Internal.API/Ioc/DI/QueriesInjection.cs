@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
-using MeetingRoom.Infra.Data.Query.MapperProfile;
+﻿using MediatR;
 using MeetingRoom.Infra.Data.Query.Queries.DTO;
 using MeetingRoom.Infra.Data.Query.Queries.Room;
 using MeetingRoom.Infra.Data.Query.Queries.Scheduler;
@@ -13,8 +11,6 @@ namespace MeetingRoom.Internal.API.Ioc.DI
     {
         public static void Inject(IServiceCollection services)
         {
-            services.AddAutoMapper(typeof(AutoMapping));
-
             services.AddScoped<IRequestHandler<GetRoomQuery, IEnumerable<RoomDto>>, RoomQueryHandler>();
             services.AddScoped<IRequestHandler<GetSchedulerQuery, IEnumerable<GetSchedulerQueryResponse>>, SchedulerQueryHandler>();
         }

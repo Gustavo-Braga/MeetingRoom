@@ -1,32 +1,36 @@
-﻿using MeetingRoom.Infra.Data.Query.Context;
-using MeetingRoom.Infra.Data.Query.Entities;
+﻿using Dapper;
 using MeetingRoom.Infra.Data.Query.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using System;
+using MeetingRoom.Infra.Data.Query.Queries.DTO;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace MeetingRoom.Infra.Data.Query.Repositories
 {
     public class RoomRepository : IRoomRepository
     {
-        private readonly DbContext _dbContext;
-        private DbSet<Room> _dbSet;
+        private readonly IDbConnection _dbConnection;
 
-        public RoomRepository(MeetingRoomQueryDBContex context)
+
+        public RoomRepository(IDbConnection dbConnection)
         {
-            _dbContext = context;
-            _dbSet = context.Set<Room>();
+            _dbConnection = dbConnection;
         }
 
-        public async Task<IEnumerable<Room>> GetAsync(Func<Room, bool> predicate)
+        public async Task<IEnumerable<RoomDto>> GetAsync(string name)
         {
-            return await Task.Run(() =>
-            {
-                return _dbSet.AsQueryable().Where(predicate).AsEnumerable();
+            var sql = "SELECT Id, [Name], [Description] FROM Room " +
+                "where @Name is null or @Name = [Name]";
 
-            });
+            var result = await _dbConnection.QueryAsync<RoomDto>(
+                sql,
+                param: new
+                {
+                    Name = name
+                },
+                commandType: CommandType.Text);
+
+            return result;
         }
 
     }

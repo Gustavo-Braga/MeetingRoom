@@ -6,15 +6,13 @@ namespace MeetingRoom.Infra.Data.Query.Queries.Scheduler
 {
     public class GetSchedulerQueryResponse
     {
-        public GetSchedulerQueryResponse(Guid id, string title, IEnumerable<RoomDto> rooms)
+        public GetSchedulerQueryResponse()
         {
-            Id = id;
-            Title = title;
-            Rooms = rooms;
+            Rooms = new List<RoomDto>();
         }
 
         public Guid Id { get; set; }
         public string Title { get; set; }
-        public IEnumerable<RoomDto> Rooms { get; set; }
+        public IList<RoomDto> Rooms { get; set; }
     }
 }

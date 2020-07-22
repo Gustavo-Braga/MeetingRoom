@@ -10,18 +10,16 @@ namespace MeetingRoom.Infra.Data.Query.Queries.Room
 {
     public class RoomQueryHandler : IRequestHandler<GetRoomQuery, IEnumerable<RoomDto>>
     {
-        private readonly IMapper _mapper;
         private readonly IRoomRepository _roomRepository;
 
-        public RoomQueryHandler(IMapper mapper, IRoomRepository roomRepository)
+        public RoomQueryHandler(IRoomRepository roomRepository)
         {
-            _mapper = mapper;
             _roomRepository = roomRepository;
         }
 
         public async Task<IEnumerable<RoomDto>> Handle(GetRoomQuery request, CancellationToken cancellationToken)
         {
-            return _mapper.Map<IEnumerable<RoomDto>>(await _roomRepository.GetAsync(x => !string.IsNullOrEmpty(request.Name) ? x.Name == request.Name : true));
+            return await _roomRepository.GetAsync(!string.IsNullOrEmpty(request.Name) ? request.Name : null);
         }
     }
 }
